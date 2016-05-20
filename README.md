@@ -2,6 +2,8 @@
 
 ![](http://suda.github.io/drone-telemetry/images/telemetry-demo.gif)
 
+Gauge widgets by [PefrectWidgets](http://perfectwidgets.com/order).
+
 ## Running
 
 ### Parts
