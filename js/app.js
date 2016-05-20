@@ -99,8 +99,12 @@ App.prototype.onEventSourceMessage = function onEventSourceMessage(event) {
 }
 
 App.prototype.initEventSource = function initEventSource() {
-  this.eventSource = new EventSource('http://172.24.1.254');
-  // this.eventSource = new EventSource('http://192.168.1.254');
+  var address = window.localStorage.ip;
+  if (!address) address = prompt("Enter server IP or hostname");
+  if (!!address) window.localStorage.ip = address;
+  $("#address").text(!!address ? address : 'Unknown address');
+
+  this.eventSource = new EventSource('http://' + address);
 
   this.eventSource.addEventListener('open', this.onEventSourceOpened.bind(this), false);
   this.eventSource.addEventListener('error', this.onEventSourceError.bind(this), false);
@@ -113,6 +117,11 @@ App.prototype.initLagometer = function initLagometer() {
   this._lagometer.addTimeSeries(this._lagSeries, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
   this._lagometer.streamTo(document.getElementById("chart"), 500);
   $("#chart").attr('width', window.innerWidth);
+}
+
+App.prototype.enterAddress = function enterAddress() {
+  window.localStorage.removeItem('ip');
+  this.initEventSource();
 }
 
 App.prototype._unpackDataFrame = function _unpackDataFrame(frame) {

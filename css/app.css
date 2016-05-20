@@ -19,3 +19,13 @@ body {
   bottom: 0;
   left:0;
 }
+
+#address {
+  font-family: Helvetica;
+  font-weight: 800;
+  text-decoration: none;
+  color: #ccc;
+  position: absolute;
+  right: 5px;
+  bottom: 80px;
+}
