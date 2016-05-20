@@ -6,30 +6,34 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 #define LSM9DS1_M	0x1E
 #define LSM9DS1_AG	0x6B
 
+// #define STATIC_IP
+
 // http://www.ngdc.noaa.gov/geomag-web/#declination
 #define DECLINATION -13.39
 
 LSM9DS1 imu;
 TCPServer server = TCPServer(80);
 TCPClient client;
+bool printedWifi;
 
 void setup()
 {
   Serial.begin(115200);
 
+#if defined(STATIC_IP)
   // Set static IP
-  /*IPAddress myAddress(192, 168, 1, 254);
+  IPAddress myAddress(192, 168, 1, 254);
   IPAddress gateway(192, 168, 1, 1);
-  IPAddress dns(192, 168, 1, 1);*/
-  IPAddress myAddress(172, 24, 1, 254);
-  IPAddress gateway(172, 24, 1, 1);
   IPAddress dns(8, 8, 8, 8);
   IPAddress netmask(255, 255, 255, 0);
   WiFi.setStaticIP(myAddress, netmask, gateway, dns);
 
   // now let's use the configured IP
   WiFi.useStaticIP();
+#endif
+
   WiFi.connect();
+  Particle.connect();
 
   // Before initializing the IMU, there are a few settings
   // we may need to adjust. Use the settings struct to set
@@ -52,19 +56,13 @@ void setup()
 
   server.begin();
 
-  Particle.publish("telemetry-ip", WiFi.localIP().toString());
-  Particle.publish("telemetry-ssid", WiFi.SSID());
-
-  Serial.print("IP: ");
-  Serial.println(WiFi.localIP().toString());
-  Serial.print("SSID: ");
-  Serial.println(WiFi.SSID());
-
   Serial.println("Board initialized!");
 }
 
 void loop()
 {
+  if (WiFi.ready() && !printedWifi) printWifi();
+
   if (client.connected()) {
     imu.readGyro();
     imu.readAccel();
@@ -105,6 +103,19 @@ void loop()
       serverSentEventHeader();
     }
   }
+}
+
+void printWifi() {
+  if (!WiFi.localIP()) return;
+  Particle.publish("telemetry-ip", WiFi.localIP().toString());
+  Particle.publish("telemetry-ssid", WiFi.SSID());
+
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP().toString());
+  Serial.print("SSID: ");
+  Serial.println(WiFi.SSID());
+
+  printedWifi = true;
 }
 
 // Calculate pitch, roll, and heading.
